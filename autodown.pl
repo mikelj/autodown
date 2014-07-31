@@ -13,15 +13,19 @@ sub copyFile;
 my $sym_dir = "/home/media/jayne/rtorrent/completed/";
 my $remote_dir = "/home/media/jayne/rtorrent/download/";
 my $base_dir = "/home/media/video/television";
-my $log_file = "/home/mikel/autodl.log";
+my $log_file = "/var/log/autodown.log";
 my $timestamp;
 open(my $lfh, '>>', $log_file) or die "Could not open log file $log_file $!";
+*STDERR = $lfh;
+
 
 my @daily = ("Jeopardy", "The Daily Show", "The Colbert Report");
 my @weekly = ("How Its Made", "The First 48");
 
 opendir(my $DIR, $sym_dir) || die "Error: Can't open $sym_dir: $!";
 my @files = readdir($DIR);
+my $i = 0;
+my $j = 0;
 
 closedir($DIR);
 
@@ -31,6 +35,7 @@ print $lfh "$timestamp [beginning remote file sync]\n";
 
 foreach my $f (@files) {
     #$f = trim($f);
+    $i++;
     my $symsrc = "$sym_dir$f";
     if ($f =~ /^[Jj]eopardy/) {
 	if (-f "$remote_dir$f") {
@@ -69,6 +74,9 @@ foreach my $f (@files) {
 	print "[no match] $f\n";
     }
 }
+$timestamp = getLoggingTime();
+print $lfh "$timestamp [sync finished] files scanned: $i files copied: $j\n";
+close $lfh;
 
 sub getLoggingTime {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
@@ -93,7 +101,7 @@ sub copyFile {
     my $rate = (($size/1024)/$diff); 
     print "$timestamp [copy complete] $size transferred in ".$diff."s (".$rate."KB/s)\n";
     print $lfh "$timestamp [copy complete] $size transferred in ".$diff."s (".$rate."KB/s)\n";
-
+    $j++;
 }
 
 
