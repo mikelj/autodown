@@ -8,6 +8,7 @@ use File::stat;
 #use String::Util 'trim';
 
 sub getLoggingTime;
+sub unLink;
 sub copyFile;
 
 my $sym_dir = "/home/media/jayne/rtorrent/completed/";
@@ -20,7 +21,7 @@ open(my $lfh, '>>', $log_file) or die "Could not open log file $log_file $!";
 
 
 my @daily = ("Jeopardy", "The Daily Show", "The Colbert Report");
-my @weekly = ("How Its Made", "The First 48");
+my @weekly = ("Last Week Tonight With John Oliver","How Its Made", "The First 48");
 
 opendir(my $DIR, $sym_dir) || die "Error: Can't open $sym_dir: $!";
 my @files = readdir($DIR);
@@ -38,45 +39,58 @@ foreach my $f (@files) {
     $i++;
     my $symsrc = "$sym_dir$f";
     if ($f =~ /^[Jj]eopardy/) {
-	if (-f "$remote_dir$f") {
-	    print("[jeopardy] $f\n");
-	    copyFile($f, $daily[0]);
-	} else {
-	    $timestamp = getLoggingTime();
-	    print $lfh "$timestamp [broken link] $symsrc\n";
-	}
-	unlink $symsrc or warn "Could not delete $symsrc: $!";
-	$timestamp = getLoggingTime();
-	print $lfh "$timestamp [link removed]: $symsrc\n";
+	    if (-f "$remote_dir$f") {
+	        print("[jeopardy] $f\n");
+	        copyFile($f, $daily[0]);
+	    } else {
+	        $timestamp = getLoggingTime();
+	        print $lfh "$timestamp [broken link] $symsrc\n";
+	    }
+	    unLink($symsrc, $lfh);
+    
     } elsif ($f =~ /^[Tt]he.[Dd]aily.[Ss]how/) {
-	if (-f "$remote_dir$f") {
-	    print("[the daily show] $f\n");
-	    copyFile($f, $daily[1]);
-	} else {
-	    $timestamp = getLoggingTime();
-	    print $lfh "$timestamp [broken link] $symsrc\n";
-	}
-	unlink $symsrc or warn "Could not delete $symsrc: $!";
-	$timestamp = getLoggingTime();
-	print $lfh "$timestamp [link removed]: $symsrc\n";
+	    if (-f "$remote_dir$f") {
+	        print("[the daily show] $f\n");
+	        copyFile($f, $daily[1]);
+	    } else {
+	        $timestamp = getLoggingTime();
+	        print $lfh "$timestamp [broken link] $symsrc\n";
+	    }
+	    unLink($symsrc, $lfh);
+    
     } elsif ($f =~ /^[Tt]he.[Cc]olbert.[Rr]eport/) {
-	if (-f "$remote_dir$f") {
-	    print("[the colbert report] $f\n");
-	    copyFile($f, $daily[2]); 
-	} else {
-	    $timestamp = getLoggingTime();
-	    print $lfh "$timestamp [broken link] $symsrc\n";
-	}	
-	unlink $symsrc or warn "Could not delete $symsrc: $!";
-	$timestamp = getLoggingTime();
-	print $lfh "$timestamp [link removed]: $symsrc\n";
+	    if (-f "$remote_dir$f") {
+	        print("[the colbert report] $f\n");
+	        copyFile($f, $daily[2]); 
+	    } else {
+	        $timestamp = getLoggingTime();
+	        print $lfh "$timestamp [broken link] $symsrc\n";
+	    }	
+	    unLink($symsrc, $lfh);
+    
+    } elsif ($f =~ /^[Ll]ast.[Ww]eek.[Tt]onight/) {
+        if (-f "$remote_dir$f") {
+            print("[last week tonight] $f\n");
+            copyFile($f, $weekly[0]);
+        } else {
+            $timestamp = getLoggingTime();
+            print $lfh "$timestamp [broken link] $symsrc\n";
+        }
     } else {
-	print "[no match] $f\n";
+	
+        print "[no match] $f\n";
     }
 }
 $timestamp = getLoggingTime();
 print $lfh "$timestamp [sync finished] files scanned: $i files copied: $j\n";
 close $lfh;
+
+sub unLink {
+    my($symsrc, $lfh) = @_;
+    unlink $symsrc or warn "Could not delete $symsrc\n";
+    $timestamp = getLoggingTime();
+    print $lfh "$timestamp [link removed]: $symsrc\n";
+}
 
 sub getLoggingTime {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
