@@ -82,6 +82,7 @@ foreach my $f (@files) {
             $timestamp = getLoggingTime();
             print $lfh "$timestamp [broken link] $symsrc\n";
         }
+        unLink($symsrc, $lfh);
     } else {
 	
         print "[no match] $f\n";
