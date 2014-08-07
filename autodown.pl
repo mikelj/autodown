@@ -5,6 +5,7 @@ use warnings;
 
 use File::Copy "cp";
 use File::stat;
+use Fcntl qw(:flock);
 #use String::Util 'trim';
 
 sub getLoggingTime;
@@ -19,6 +20,11 @@ my $timestamp;
 open(my $lfh, '>>', $log_file) or die "Could not open log file $log_file $!";
 *STDERR = $lfh;
 
+unless (flock(DATA, LOCK_EX|LOCK_NB)) {
+    $timestamp = getLoggingTime();
+    print $lfh "$timestamp $0 is already running. Exiting..\n";
+    exit(1);
+}
 
 my @daily = ("Jeopardy", "The Daily Show", "The Colbert Report");
 my @weekly = ("Last Week Tonight With John Oliver","How Its Made", "The First 48");
@@ -118,5 +124,7 @@ sub copyFile {
     $j++;
 }
 
-
+__DATA__
+This exists so flock() code above works
+DO NOT REMOVE THIS DATA SECTION.
 
