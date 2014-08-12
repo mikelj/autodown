@@ -99,6 +99,8 @@ sub unLink {
     print $lfh "$timestamp [link removed]: $symsrc\n";
 }
 
+# getLoggingTime from stackoverflow user Shizon
+# http://stackoverflow.com/questions/12644322/
 sub getLoggingTime {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
     my $nice_timestamp = sprintf ( "%04d%02d%02d %02d:%02d:%02d",
