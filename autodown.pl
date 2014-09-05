@@ -6,6 +6,7 @@ use warnings;
 use File::Copy "cp";
 use File::stat;
 use Fcntl qw(:flock);
+use Switch;
 #use String::Util 'trim';
 
 sub getLoggingTime;
@@ -44,7 +45,9 @@ foreach my $f (@files) {
     #$f = trim($f);
     $i++;
     my $symsrc = "$sym_dir$f";
-    if ($f =~ /^[Jj]eopardy/) {
+    switch ($f) {
+        
+    case /^[Jj]eopardy/ {
 	    if (-f "$remote_dir$f") {
 	        print("[jeopardy] $f\n");
 	        copyFile($f, $daily[0]);
@@ -53,8 +56,8 @@ foreach my $f (@files) {
 	        print $lfh "$timestamp [broken link] $symsrc\n";
 	    }
 	    unLink($symsrc, $lfh);
-    
-    } elsif ($f =~ /^[Tt]he.[Dd]aily.[Ss]how/) {
+    } 
+    case /^[Tt]he.[Dd]aily.[Ss]how/ {
 	    if (-f "$remote_dir$f") {
 	        print("[the daily show] $f\n");
 	        copyFile($f, $daily[1]);
@@ -63,8 +66,8 @@ foreach my $f (@files) {
 	        print $lfh "$timestamp [broken link] $symsrc\n";
 	    }
 	    unLink($symsrc, $lfh);
-    
-    } elsif ($f =~ /^[Tt]he.[Cc]olbert.[Rr]eport/) {
+    } 
+    case /^[Tt]he.[Cc]olbert.[Rr]eport/ {
 	    if (-f "$remote_dir$f") {
 	        print("[the colbert report] $f\n");
 	        copyFile($f, $daily[2]); 
@@ -73,8 +76,8 @@ foreach my $f (@files) {
 	        print $lfh "$timestamp [broken link] $symsrc\n";
 	    }	
 	    unLink($symsrc, $lfh);
-    
-    } elsif ($f =~ /^[Ll]ast.[Ww]eek.[Tt]onight/) {
+    }
+    case /^[Ll]ast.[Ww]eek.[Tt]onight/ {
         if (-f "$remote_dir$f") {
             print("[last week tonight] $f\n");
             copyFile($f, $weekly[0]);
@@ -83,9 +86,10 @@ foreach my $f (@files) {
             print $lfh "$timestamp [broken link] $symsrc\n";
         }
         unLink($symsrc, $lfh);
-    } else {
-	
-        print "[no match] $f\n";
+    } 
+    else {
+	    print "[no match] $f\n";
+    }
     }
 }
 $timestamp = getLoggingTime();
