@@ -39,7 +39,7 @@ closedir($DIR);
 
 $timestamp = getLoggingTime();
 
-print $lfh "$timestamp [beginning remote file sync]\n";
+print("$timestamp [beginning remote file sync]\n");
 
 foreach my $f (@files) {
     #$f = trim($f);
@@ -127,7 +127,8 @@ sub copyFile {
     my $size = $sb->size;
     my $rate = (($size/1024)/$diff); 
     print "$timestamp [copy complete] $size transferred in ".$diff."s (".$rate."KB/s)\n";
-    print $lfh "$timestamp [copy complete] $size transferred in ".$diff."s (".$rate."KB/s)\n";
+    print $lfh "$timestamp [copy complete] $size transferred in ".$diff."s (";
+    printf $lfh,"%.2fKB/s\n", $rate;
     $j++;
 }
 
