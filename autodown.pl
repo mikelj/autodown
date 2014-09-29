@@ -28,7 +28,14 @@ unless (flock(DATA, LOCK_EX|LOCK_NB)) {
 }
 
 my @daily = ("Jeopardy", "The Daily Show", "The Colbert Report");
-my @weekly = ("Last Week Tonight With John Oliver","How Its Made", "The First 48");
+my @weekly = ("Last Week Tonight With John Oliver",
+            "How Its Made", 
+            "The First 48",
+            "The Simpsons",
+            "Family Guy",
+            "American Dad",
+            "Bob's Burgers"
+            );
 
 opendir(my $DIR, $sym_dir) || die "Error: Can't open $sym_dir: $!";
 my @files = readdir($DIR);
@@ -87,6 +94,16 @@ foreach my $f (@files) {
         }
         unLink($symsrc, $lfh);
     } 
+    case /^[Ff]amily.[Gg]uy.[Ss]13/ {
+        if (-f "$remote_dir$f") {
+            print("[family guy season 13] $f\n");
+            copyFile($f, "$weekly[4]/Season 13");
+        } else {
+            $timestamp = getLoggingTime();
+            print $lfh "$timestamp [broken link] $symsrc\n";
+        }
+        unLink($symsrc, $lfh);
+    }
     else {
 	    print "[no match] $f\n";
     }
@@ -128,7 +145,7 @@ sub copyFile {
     my $rate = (($size/1024)/$diff); 
     print "$timestamp [copy complete] $size transferred in ".$diff."s (".$rate."KB/s)\n";
     print $lfh "$timestamp [copy complete] $size transferred in ".$diff."s (";
-    printf $lfh,"%.2fKB/s\n", $rate;
+    printf $lfh "%.2fKB/s\n", $rate;
     $j++;
 }
 
